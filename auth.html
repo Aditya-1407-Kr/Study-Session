@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyOS — Your Academic Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sage: #8BAF8E;
+    --sage-light: #C8DBC9;
+    --sage-dark: #5A7A5E;
+    --cream: #F5F0E8;
+    --warm-white: #FDFAF5;
+    --charcoal: #2C2C2C;
+    --muted: #8A8A8A;
+    --amber: #D4956A;
+    --amber-light: #F2C9A8;
+    --error: #C0616B;
+    --card-bg: rgba(255,255,255,0.75);
+    --shadow: 0 8px 32px rgba(90,122,94,0.12);
+  }
+  [data-theme="dark"] {
+    --cream: #1A1E1B;
+    --warm-white: #222722;
+    --charcoal: #E8E4DC;
+    --muted: #8A9A8C;
+    --card-bg: rgba(34,40,34,0.85);
+    --shadow: 0 8px 32px rgba(0,0,0,0.32);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s, color 0.3s;
+    overflow: hidden;
+  }
+  .bg-blobs {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+  }
+  .blob-1 { width: 500px; height: 500px; background: var(--sage-light); top: -100px; left: -100px; animation: float1 12s ease-in-out infinite; }
+  .blob-2 { width: 350px; height: 350px; background: var(--amber-light); bottom: -80px; right: -80px; animation: float2 15s ease-in-out infinite; }
+  .blob-3 { width: 250px; height: 250px; background: var(--sage); top: 50%; left: 60%; animation: float3 10s ease-in-out infinite; }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,20px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-30px)} }
+  @keyframes float3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(15px,-20px)} }
+
+  .auth-container {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 440px;
+    padding: 20px;
+  }
+  .auth-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 48px 44px;
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(139,175,142,0.2);
+    animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .logo-mark {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 22px; color: white; font-weight: 700;
+    box-shadow: 0 4px 16px rgba(90,122,94,0.3);
+  }
+  .logo-text { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: var(--charcoal); }
+  .logo-text span { color: var(--sage-dark); }
+
+  h2 { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; margin-bottom: 6px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .tab-row { display: flex; gap: 4px; background: var(--cream); border-radius: 12px; padding: 4px; margin-bottom: 28px; }
+  .tab-btn {
+    flex: 1; padding: 9px; border: none; background: none; border-radius: 9px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn.active { background: white; color: var(--charcoal); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  [data-theme="dark"] .tab-btn.active { background: var(--warm-white); }
+
+  .field { margin-bottom: 18px; }
+  label { font-size: 13px; font-weight: 500; color: var(--charcoal); display: block; margin-bottom: 7px; }
+  input {
+    width: 100%; padding: 12px 16px;
+    background: var(--warm-white);
+    border: 1.5px solid rgba(139,175,142,0.25);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    color: var(--charcoal);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(139,175,142,0.15); }
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+    color: white; border: none; border-radius: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(90,122,94,0.35);
+    margin-top: 8px;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(90,122,94,0.45); }
+  .btn-primary:active { transform: translateY(0); }
+  .error-msg { color: var(--error); font-size: 13px; margin-top: 10px; text-align: center; min-height: 18px; }
+  .theme-toggle {
+    position: fixed; top: 20px; right: 20px; z-index: 10;
+    background: var(--card-bg); backdrop-filter: blur(10px);
+    border: 1px solid rgba(139,175,142,0.2);
+    border-radius: 50%; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; box-shadow: var(--shadow);
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover { transform: scale(1.1); }
+  .loading { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="logo">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">Study<span>OS</span></div>
+    </div>
+    <h2 id="authTitle">Welcome back</h2>
+    <p class="subtitle" id="authSubtitle">Sign in to your study dashboard</p>
+
+    <div class="tab-row">
+      <button class="tab-btn active" id="loginTab" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <div id="authForm">
+      <div class="field" id="nameField" style="display:none">
+        <label>Full Name</label>
+        <input type="text" id="nameInput" placeholder="Your name">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="emailInput" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="passwordInput" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" id="authBtn" onclick="handleAuth()">Sign In</button>
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Clear stale service workers and caches once per tab to avoid old project pages.
+(async () => {
+  if (sessionStorage.getItem('studyos-cache-reset') === '1') return;
+  sessionStorage.setItem('studyos-cache-reset', '1');
+
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (_) {
+    // Best-effort cleanup.
+  }
+})();
+
+// ═══════════════════════════════════════════
+// CONFIGURATION — Replace with your Supabase credentials
+// ═══════════════════════════════════════════
+const SUPABASE_URL = 'https://hrvvwtsurkqptrqjzoli.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhydnZ3dHN1cmtxcHRycWp6b2xpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzEyNjksImV4cCI6MjA5MzEwNzI2OX0.xmXPj92Vui8nfxsDtksmNZdk6kEQDIk5IOvWfR431oc';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentTab = 'login';
+
+// Theme
+const savedTheme = localStorage.getItem('studyos-theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('themeToggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('studyos-theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+});
+
+// Check existing session
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) window.location.href = 'dashboard.html';
+})();
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+  document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+  document.getElementById('nameField').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('authTitle').textContent = tab === 'login' ? 'Welcome back' : 'Create account';
+  document.getElementById('authSubtitle').textContent = tab === 'login' ? 'Sign in to your study dashboard' : 'Start your learning journey';
+  document.getElementById('authBtn').textContent = tab === 'login' ? 'Sign In' : 'Create Account';
+  document.getElementById('errorMsg').textContent = '';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value;
+  const btn = document.getElementById('authBtn');
+  const err = document.getElementById('errorMsg');
+
+  if (!email || !password) { err.textContent = 'Please fill in all fields'; return; }
+  
+  btn.innerHTML = '<span class="loading"></span>Please wait...';
+  btn.disabled = true;
+  err.textContent = '';
+
+  try {
+    let result;
+    if (currentTab === 'login') {
+      result = await sb.auth.signInWithPassword({ email, password });
+    } else {
+      const name = document.getElementById('nameInput').value.trim();
+      result = await sb.auth.signUp({ email, password, options: { data: { full_name: name } } });
+    }
+
+    if (result.error) throw result.error;
+    if (currentTab === 'signup' && !result.data.session) {
+      err.style.color = 'var(--sage-dark)';
+      err.textContent = '✓ Check your email to confirm your account';
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+  } catch (e) {
+    err.style.color = 'var(--error)';
+    err.textContent = e.message || 'Authentication failed';
+  } finally {
+    btn.innerHTML = currentTab === 'login' ? 'Sign In' : 'Create Account';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleAuth();
+});
+</script>
+</body>
+</html>
