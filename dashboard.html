@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Study OS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== APP LAYOUT ===== -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath d='M3 6h13v13H3z' fill='%23EEEDFE' stroke='%23534AB7' stroke-width='1.2'/%3E%3Cpath d='M16 6h4v13h-4z' fill='%23FFF' stroke='%237F77DD' stroke-width='1.0'/%3E%3C/svg%3E" alt="Study OS logo" style="width:36px;height:36px;display:block" />
+        </div>
+        <span class="sidebar-logo-text">Study OS</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">S</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebar-name">Student</div>
+          <div class="sidebar-user-email" id="sidebar-email">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">⊞</span> Dashboard
+      </div>
+      <div class="nav-item" data-view="timer">
+        <span class="nav-icon">⏱</span> Study Timer
+      </div>
+      <div class="nav-item" data-view="analytics">
+        <span class="nav-icon">📊</span> Analytics
+      </div>
+
+      <div class="nav-section-label">Subjects</div>
+      <div class="nav-item" data-view="subjects">
+        <span class="nav-icon">📚</span> All Subjects
+        <span class="nav-badge" id="subjects-count">0</span>
+      </div>
+      <div class="nav-item" data-view="parser">
+        <span class="nav-icon">✦</span> Syllabus Parser
+      </div>
+
+      <div class="nav-section-label">Tools</div>
+      <div class="nav-item" id="focus-mode-btn">
+        <span class="nav-icon">🎯</span> Focus Mode
+      </div>
+      <div class="nav-item" data-view="goals">
+        <span class="nav-icon">🏆</span> Goals &amp; Streaks
+      </div>
+      <div class="nav-item" data-view="gamification">
+        <span class="nav-icon">⚡</span> Progress
+      </div>
+    </nav>
+
+    <!-- GAMIFICATION MINI BAR -->
+    <div id="gam-mini-bar"></div>
+
+    <div class="sidebar-footer">
+      <div class="theme-toggle" id="theme-toggle">
+        <span class="theme-toggle-label">
+          <span id="theme-icon">🌙</span> Dark Mode
+        </span>
+        <div class="toggle-switch"></div>
+      </div>
+      <div class="nav-item" id="logout-btn" style="margin-top:4px;">
+        <span class="nav-icon">→</span> Sign Out
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="main-content">
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    <div class="view active" id="view-dashboard">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title" id="dash-greeting">Good morning!</h2>
+          <p class="page-subtitle" id="dash-date">Loading...</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" data-open-modal="add-subject-modal">+ New Subject</button>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="dashboard-grid">
+        <div class="stat-card orange">
+          <div class="stat-icon orange">⏱</div>
+          <div class="stat-value" id="stat-today">0m</div>
+          <div class="stat-label">Today's Study</div>
+          <div class="stat-change" id="stat-today-change"></div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">✓</div>
+          <div class="stat-value" id="stat-topics">0</div>
+          <div class="stat-label">Topics Done</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">📚</div>
+          <div class="stat-value" id="stat-subjects">0</div>
+          <div class="stat-label">Subjects</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon gold">🔥</div>
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+      </div>
+
+      <!-- Weekly + Subjects -->
+      <div class="dashboard-sections">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">This Week</span>
+            <span class="text-muted" style="font-size:0.82rem;" id="week-total">0 min total</span>
+          </div>
+          <div class="week-chart" id="week-chart">
+            <div class="page-loading"><span class="loading-spinner"></span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Subject Progress</span>
+          </div>
+          <div class="subject-progress-list" id="dash-subject-progress">
+            <div class="page-loading"><span class="loading-spinner"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Activity</span>
+        </div>
+        <div class="activity-list" id="activity-list">
+          <div class="page-loading"><span class="loading-spinner"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SUBJECTS VIEW ===== -->
+    <div class="view" id="view-subjects">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Subjects</h2>
+          <p class="page-subtitle">Manage all your study subjects</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-primary btn-sm" data-open-modal="add-subject-modal">+ Add Subject</button>
+        </div>
+      </div>
+      <div class="subjects-grid" id="subjects-grid">
+        <div class="page-loading"><span class="loading-spinner"></span> Loading subjects...</div>
+      </div>
+    </div>
+
+    <!-- ===== TIMER VIEW ===== -->
+    <div class="view" id="view-timer">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Study Timer</h2>
+          <p class="page-subtitle">Track your focus sessions accurately</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;">
+        <!-- Timer Card -->
+        <div class="timer-card">
+          <div class="timer-label">FOCUS SESSION</div>
+          <div class="timer-display" id="timer-display">00:00</div>
+          <div class="timer-session-info" id="timer-session-info">Select subject to begin</div>
+
+          <div class="timer-selects">
+            <select class="timer-select" id="timer-subject-select">
+              <option value="">— Select Subject —</option>
+            </select>
+            <select class="timer-select" id="timer-module-select">
+              <option value="">— Select Module —</option>
+            </select>
+          </div>
+
+          <div class="timer-controls">
+            <button class="btn btn-ghost" id="timer-reset-btn" style="color:rgba(245,240,232,0.5);font-size:0.85rem;">Reset</button>
+            <button class="timer-btn-main" id="timer-main-btn" title="Start/Stop">▶</button>
+            <button class="btn btn-ghost" id="focus-mode-timer-btn" style="color:rgba(245,240,232,0.5);font-size:0.85rem;">Focus</button>
+          </div>
+        </div>
+
+        <!-- Today's Sessions -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Today's Log</span>
+              <span id="today-total-badge" style="font-size:0.82rem;color:var(--accent);font-weight:600;">0m total</span>
+            </div>
+            <div id="today-sessions-list" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+              <div class="empty-state" style="padding:24px 16px;">
+                <span class="empty-state-icon" style="font-size:2rem;">🌱</span>
+                <p style="font-size:0.85rem;color:var(--ink3);">No sessions yet today. Start a timer!</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Goal Progress</span>
+            </div>
+            <div class="goal-ring-container" id="timer-goal-container">
+              <svg class="goal-ring-svg" width="90" height="90" viewBox="0 0 90 90">
+                <circle class="goal-ring-circle" cx="45" cy="45" r="37"/>
+                <circle class="goal-ring-progress" id="timer-goal-ring" cx="45" cy="45" r="37"
+                  stroke-dasharray="232.5"
+                  stroke-dashoffset="232.5"/>
+                <text class="goal-ring-text" x="45" y="42" id="timer-goal-pct">0%</text>
+                <text class="goal-ring-sublabel" x="45" y="54">of goal</text>
+              </svg>
+              <div class="goal-info">
+                <div class="goal-label">Daily goal</div>
+                <div class="goal-value" id="timer-goal-value">2h 0m</div>
+                <button class="btn btn-secondary btn-sm" data-open-modal="set-goal-modal">Change Goal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ANALYTICS VIEW ===== -->
+    <div class="view" id="view-analytics">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Analytics</h2>
+          <p class="page-subtitle">Visualise your study patterns and progress</p>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Subject Completion</span>
+          </div>
+          <div id="analytics-subjects" style="display:flex;flex-direction:column;gap:16px;margin-top:8px;">
+            <div class="page-loading"><span class="loading-spinner"></span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Weekly Hours</span></div>
+            <div style="font-size:0.82rem;color:var(--ink3);margin-top:4px;">
+              <span id="analytics-week-total" style="font-family:var(--font-display);font-size:1.8rem;color:var(--ink);">0</span>
+              <span style="margin-left:4px;">min this week</span>
+            </div>
+            <div class="week-chart" id="analytics-week-chart" style="margin-top:12px;height:80px;">
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">All-Time Stats</span></div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.85rem;color:var(--ink3);">Total study time</span>
+                <span id="stat-alltime" style="font-weight:600;color:var(--ink);">0m</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.85rem;color:var(--ink3);">Sessions recorded</span>
+                <span id="stat-sessions" style="font-weight:600;color:var(--ink);">0</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:0.85rem;color:var(--ink3);">Avg session length</span>
+                <span id="stat-avg" style="font-weight:600;color:var(--ink);">0m</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module progress -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header">
+          <span class="card-title">Module Breakdown</span>
+        </div>
+        <div id="analytics-modules" style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
+          <div class="page-loading"><span class="loading-spinner"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PARSER VIEW ===== -->
+    <div class="view" id="view-parser">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Syllabus Parser</h2>
+          <p class="page-subtitle">Paste your syllabus — we'll build the structure for you</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Paste Syllabus</span>
+          </div>
+          <div class="form-group" style="margin-top:8px;">
+            <label>Select Subject to add into</label>
+            <select id="parser-subject-select">
+              <option value="">— Choose Subject —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Raw Syllabus Text</label>
+            <textarea id="parser-input" style="min-height:220px;font-family:monospace;font-size:0.82rem;" placeholder="Paste your syllabus here...
+
+Example:
+Module I: Introduction to Computers
+1. History of Computing
+2. Types of Computers
+3. Input/Output Devices
+
+Module II: Operating Systems
+- Windows Basics
+- Linux Fundamentals
+- File Management"></textarea>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="parser-parse-btn" style="width:100%;margin-bottom:10px;">Preview Structure</button>
+          <button class="btn btn-primary" id="parser-save-btn" style="width:100%;" disabled>Save to Subject</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Detected Structure</span>
+            <span id="parser-stats" style="font-size:0.8rem;color:var(--ink4);"></span>
+          </div>
+          <div class="parser-preview" id="parser-preview" style="margin-top:4px;min-height:200px;">
+            <p style="color:var(--ink4);text-align:center;padding:40px 0;font-size:0.88rem;">Preview will appear here after parsing.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GOALS VIEW ===== -->
+    <div class="view" id="view-goals">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Goals &amp; Streaks</h2>
+          <p class="page-subtitle">Build your daily study habit</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔥 Study Streak</span>
+          </div>
+          <div class="streak-display" style="margin-top:12px;">
+            <div class="streak-flame">🔥</div>
+            <div>
+              <div class="streak-count" id="streak-count">0</div>
+              <div class="streak-label">Day Streak</div>
+            </div>
+          </div>
+          <div class="streak-dots" id="streak-dots" style="margin-top:16px;flex-wrap:wrap;"></div>
+          <p style="font-size:0.82rem;color:var(--ink3);margin-top:12px;">Study every day to maintain your streak!</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🏆 Daily Goal</span>
+            <button class="btn btn-secondary btn-sm" data-open-modal="set-goal-modal">Edit</button>
+          </div>
+          <div class="goal-ring-container" id="goals-ring-container" style="margin-top:12px;">
+            <svg class="goal-ring-svg" width="110" height="110" viewBox="0 0 110 110">
+              <circle class="goal-ring-circle" cx="55" cy="55" r="46"/>
+              <circle class="goal-ring-progress" id="goals-ring" cx="55" cy="55" r="46"
+                stroke-dasharray="289"
+                stroke-dashoffset="289"/>
+              <text class="goal-ring-text" x="55" y="52" id="goals-ring-pct" style="font-size:1.4rem;">0%</text>
+              <text class="goal-ring-sublabel" x="55" y="66" style="font-size:0.6rem;">of daily goal</text>
+            </svg>
+            <div class="goal-info">
+              <div class="goal-label">Today's progress</div>
+              <div class="goal-value" id="goals-today-value">0m</div>
+              <div style="font-size:0.82rem;color:var(--ink3);">Goal: <span id="goals-goal-value">2h 0m</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header">
+            <span class="card-title">Weekly Study Calendar</span>
+          </div>
+          <div id="goals-calendar" style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Gamification</span>
+          </div>
+          <div style="padding:12px" id="gamify-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+              <div>
+                <div style="font-size:0.82rem;color:var(--ink4)">XP</div>
+                <div id="gamify-xp" style="font-weight:700;font-size:1.2rem">0 XP</div>
+              </div>
+              <div>
+                <div style="font-size:0.82rem;color:var(--ink4)">Level</div>
+                <div id="gamify-level" style="font-weight:700;font-size:1.2rem">0</div>
+              </div>
+              <div style="margin-left:auto;text-align:right">
+                <button class="btn btn-secondary btn-sm" id="gamify-sync-btn">Sync</button>
+                <button class="btn btn-ghost btn-sm" id="gamify-reset-btn" style="margin-left:8px">Reset</button>
+              </div>
+            </div>
+            <div style="margin-top:10px">
+              <div style="font-size:0.85rem;color:var(--ink4)">Achievements</div>
+              <div id="gamify-achievements" style="margin-top:6px;color:var(--ink3)">None yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GAMIFICATION VIEW ===== -->
+    <div class="view" id="view-gamification">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Progress &amp; Rewards</h2>
+          <p class="page-subtitle">XP, levels, badges, and your study achievements</p>
+        </div>
+      </div>
+      <div style="max-width:600px;">
+        <div id="gam-full-panel"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== FOCUS MODE OVERLAY ===== -->
+<div class="focus-overlay" id="focus-overlay">
+  <button class="focus-exit" id="focus-exit-btn">✕ Exit Focus</button>
+  <div class="focus-task" id="focus-task-label">SELECT SUBJECT IN TIMER</div>
+  <div class="focus-timer" id="focus-timer-display">00:00</div>
+  <div style="display:flex;gap:16px;">
+    <button class="timer-btn-main" id="focus-main-btn">▶</button>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Add Subject Modal -->
+<div class="modal-overlay" id="add-subject-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">New Subject</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Subject Name</label>
+      <input type="text" id="new-subject-name" placeholder="e.g. Computer Science" />
+    </div>
+    <div class="form-group">
+      <label>Icon</label>
+      <div id="icon-picker" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
+    </div>
+    <div class="form-group">
+      <label>Color</label>
+      <div class="color-chips" id="color-picker"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-subject-btn">Create Subject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Module Modal -->
+<div class="modal-overlay" id="add-module-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Module</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Module Number</label>
+      <input type="text" id="new-module-name" placeholder="e.g. Module I" />
+    </div>
+    <div class="form-group">
+      <label>Module Title</label>
+      <input type="text" id="new-module-title" placeholder="e.g. Introduction to Networks" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-module-btn">Add Module</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Topic Modal -->
+<div class="modal-overlay" id="add-topic-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Topic</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Topic Name</label>
+      <input type="text" id="new-topic-name" placeholder="e.g. TCP/IP Model" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="new-topic-priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes (optional)</label>
+      <textarea id="new-topic-notes" placeholder="Any notes for this topic..." style="min-height:80px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-topic-btn">Add Topic</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Topic Modal -->
+<div class="modal-overlay" id="edit-topic-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Topic</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <input type="hidden" id="edit-topic-id" />
+    <div class="form-group">
+      <label>Topic Name</label>
+      <input type="text" id="edit-topic-name" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="edit-topic-priority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="edit-topic-notes" style="min-height:100px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="update-topic-btn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Goal Modal -->
+<div class="modal-overlay" id="set-goal-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Set Daily Goal</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Daily Study Goal (minutes)</label>
+      <input type="number" id="goal-input" min="10" max="720" placeholder="120" />
+      <p style="font-size:0.8rem;color:var(--ink4);margin-top:6px;">Recommended: 60–180 minutes per day</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('goal-input').value=30">30 min</button>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('goal-input').value=60">1 hour</button>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('goal-input').value=120">2 hours</button>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('goal-input').value=180">3 hours</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-goal-btn">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Modal -->
+<div class="modal-overlay" id="notes-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="notes-modal-title">Topic Notes</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <input type="hidden" id="notes-topic-id" />
+    <div class="form-group">
+      <textarea class="notes-editor" id="notes-content" placeholder="Write your notes here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-notes-btn">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initTheme, toggleTheme, toast, openModal, closeModal, closeAllModals,
+  getStreak, updateStreak, getDailyGoal, setDailyGoal,
+  formatMinutes, formatDate, timeAgo, calcProgress,
+  SUBJECT_COLORS, SUBJECT_ICONS, buildWeekChartData, $ } from './ui.js';
+import { initAuth, signOut, currentUser, getUserName, getUserInitials } from './auth.js';
+  import { gamification, LEVELS } from './gamification.js';
+  import { renderGamificationPanel, renderMiniXPBar } from './gamification-ui.js';
+import {
+  supabase,
+  getSubjects, createSubject, deleteSubject,
+  getModules, createModule, deleteModule, updateModule,
+  getTopics, getTopicsForSubject, createTopic, updateTopic, deleteTopic, toggleTopic,
+  createStudySession, getStudySessions, getTodaySessions, getAllSessions
+} from './db.js';
+import { parseSyllabus, renderParserPreview, parsedStats } from './parser.js';
+import {
+  timerState, loadTimerState, getCurrentElapsed, formatTime,
+  startTimer, stopTimer, resetTimer, onTick, onSave, resumeFromStorage
+} from './timer.js';
+
+// ===== GLOBAL STATE =====
+let user = null;
+let subjects = [];
+let modulesCache = {}; // subjectId → modules[]
+let topicsCache = {};  // moduleId → topics[]
+let sessionsCache = [];
+let currentSubjectId = null; // for subject page
+let currentModuleId = null;  // for add topic
+let parsedData = [];
+let selectedIcon = '📚';
+let selectedColor = SUBJECT_COLORS[0];
+
+// Expose to window for console debugging
+window.supabase = supabase;
+window.gamification = gamification;
+
+// ===== INIT =====
+initTheme();
+
+async function init() {
+  user = await initAuth();
+  if (!user) { window.location.href = 'index.html'; return; }
+
+  // Sidebar user info
+  document.getElementById('sidebar-name').textContent = getUserName(user);
+  document.getElementById('sidebar-email').textContent = user.email;
+  document.getElementById('sidebar-avatar').textContent = getUserInitials(user);
+
+  // Initialize gamification (set starter state, render mini bar and full panel, listen for events)
+  try {
+    // Set a firmer progression baseline: move user to Level 2 and clear unnecessary badges
+    try {
+      gamification.state.totalXP = LEVELS[1].minXP + 10; // into Level 2
+      gamification.state.earnedBadges = [];
+      gamification.state.completedTopicIds = [];
+      gamification.state.completedModuleIds = [];
+      gamification._save();
+    } catch (e) { console.warn('Failed to set starter gamification state', e); }
+
+    renderMiniXPBar('gam-mini-bar');
+    renderGamificationPanel('gam-full-panel');
+  } catch (e) {
+    console.warn('Gamification init failed', e);
+  }
+
+  // Timer
+  resumeFromStorage();
+  onTick(onTimerTick);
+  onSave(onTimerSave);
+  updateTimerUI();
+
+  // Load data
+  await loadSubjects();
+  await loadSessions();
+  await loadDashboard();
+
+  // Sync gamification with existing sessions
+  await syncGamificationFromDB();
+
+  // Populate pickers
+  populateIconPicker();
+  populateColorPicker();
+
+  // Set greeting
+  setGreeting();
+
+  // Set goal input
+  document.getElementById('goal-input').value = getDailyGoal();
+}
+
+init();
+
+// ===== NAVIGATION =====
+document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    const view = item.dataset.view;
+    navigate(view);
+  });
+});
+
+function navigate(view) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItem = document.querySelector(`.nav-item[data-view="${view}"]`);
+  if (navItem) navItem.classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const viewEl = document.getElementById(`view-${view}`);
+  if (viewEl) viewEl.classList.add('active');
+
+  // Load view-specific data
+  if (view === 'analytics') loadAnalytics();
+  if (view === 'subjects') renderSubjectsGrid();
+  if (view === 'goals') loadGoalsView();
+  if (view === 'timer') loadTimerView();
+  if (view === 'parser') loadParserSubjects();
+}
+
+// Delegated modal openers
+document.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-open-modal]');
+  if (target) openModal(target.dataset.openModal);
+});
+
+// ===== THEME =====
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const theme = toggleTheme();
+  document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+});
+
+// ===== LOGOUT =====
+document.getElementById('logout-btn').addEventListener('click', () => signOut());
+
+// ===== GREETING =====
+function setGreeting() {
+  const hour = new Date().getHours();
+  let g = 'Good morning';
+  if (hour >= 12 && hour < 17) g = 'Good afternoon';
+  else if (hour >= 17) g = 'Good evening';
+  document.getElementById('dash-greeting').textContent = `${g}, ${getUserName(user).split(' ')[0]}!`;
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+// ===== LOAD SUBJECTS =====
+async function loadSubjects() {
+  try {
+    subjects = await getSubjects(user.id);
+    document.getElementById('subjects-count').textContent = subjects.length;
+    document.getElementById('stat-subjects').textContent = subjects.length;
+  } catch (e) {
+    console.error(e);
+    const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e));
+    toast(`Failed to load subjects: ${msg}`, 'error');
+  }
+}
+
+// ===== LOAD SESSIONS =====
+async function loadSessions() {
+  try {
+    sessionsCache = await getStudySessions(user.id, 30);
+  } catch (e) {
+    console.error(e);
+    const msg = e?.message || (typeof e === 'string' ? e : JSON.stringify(e));
+    toast(`Failed to load study sessions: ${msg}`, 'error');
+  }
+}
+
+// ===== DASHBOARD =====
+async function loadDashboard() {
+  try {
+    // Today's study time
+    const today = new Date().toISOString().split('T')[0];
+    const todaySessions = sessionsCache.filter(s => s.date === today);
+    const todayTotal = todaySessions.reduce((sum, s) => sum + s.duration_minutes, 0);
+    document.getElementById('stat-today').textContent = formatMinutes(todayTotal);
+
+    // Streak
+    const streak = updateStreak(todayTotal > 0);
+    document.getElementById('stat-streak').textContent = streak.count;
+
+    // Week chart
+    const weekData = buildWeekChartData(sessionsCache);
+    const weekTotal = weekData.reduce((s, d) => s + d.minutes, 0);
+    document.getElementById('week-total').textContent = `${Math.round(weekTotal)} min total`;
+    renderWeekChart('week-chart', weekData);
+
+    // All topics count
+    let totalTopics = 0, completedTopics = 0;
+    for (const sub of subjects) {
+      const mods = await loadModulesForSubject(sub.id);
+      for (const mod of mods) {
+        const topics = await loadTopicsForModule(mod.id);
+        totalTopics += topics.length;
+        completedTopics += topics.filter(t => t.is_completed).length;
+      }
+    }
+    document.getElementById('stat-topics').textContent = `${completedTopics}/${totalTopics}`;
+
+    // Subject progress
+    renderDashSubjectProgress();
+
+    // Activity
+    renderActivity();
+  } catch (e) {
+    console.error(e);
+    toast('Some dashboard data could not be loaded.', 'error');
+  }
+}
+
+async function loadModulesForSubject(subjectId) {
+  if (!modulesCache[subjectId]) {
+    modulesCache[subjectId] = await getModules(subjectId);
+  }
+  return modulesCache[subjectId];
+}
+
+async function loadTopicsForModule(moduleId) {
+  if (!topicsCache[moduleId]) {
+    topicsCache[moduleId] = await getTopics(moduleId);
+  }
+  return topicsCache[moduleId];
+}
+
+function renderWeekChart(containerId, weekData) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const maxMin = Math.max(...weekData.map(d => d.minutes), 1);
+  container.innerHTML = weekData.map(d => {
+    const pct = (d.minutes / maxMin) * 100;
+    return `
+      <div class="week-bar-wrap">
+        <div class="week-bar ${d.isToday ? 'today' : ''}" title="${d.day}: ${Math.round(d.minutes)} min">
+          <div class="week-bar-fill" style="height:${Math.max(pct, 4)}%"></div>
+        </div>
+        <div class="week-day-label">${d.day[0]}</div>
+      </div>`;
+  }).join('');
+}
+
+async function renderDashSubjectProgress() {
+  const container = document.getElementById('dash-subject-progress');
+  if (!subjects.length) {
+    container.innerHTML = '<p style="font-size:0.85rem;color:var(--ink4);text-align:center;padding:20px 0;">No subjects yet.</p>';
+    return;
+  }
+  const items = await Promise.all(subjects.slice(0, 4).map(async (sub) => {
+    const mods = await loadModulesForSubject(sub.id);
+    let all = 0, done = 0;
+    for (const m of mods) {
+      const topics = await loadTopicsForModule(m.id);
+      all += topics.length;
+      done += topics.filter(t => t.is_completed).length;
+    }
+    const pct = all ? Math.round(done / all * 100) : 0;
+    return { sub, pct, all };
+  }));
+
+  container.innerHTML = items.map(({ sub, pct, all }) => `
+    <div class="subject-progress-item">
+      <div class="subject-progress-icon" style="background:${sub.color || SUBJECT_COLORS[0]}22;">${sub.icon || '📚'}</div>
+      <div class="subject-progress-info">
+        <div class="subject-progress-name">${sub.subject_name}</div>
+        <div class="progress-bar"><div class="progress-bar-fill orange" style="width:${pct}%"></div></div>
+      </div>
+      <div class="subject-progress-pct">${pct}%</div>
+    </div>
+  `).join('');
+}
+
+function renderActivity() {
+  const container = document.getElementById('activity-list');
+  if (!sessionsCache.length) {
+    container.innerHTML = '<p style="font-size:0.85rem;color:var(--ink4);text-align:center;padding:20px 0;">No sessions yet. Start studying!</p>';
+    return;
+  }
+  const recent = sessionsCache.slice(0, 6);
+  container.innerHTML = recent.map(s => {
+    const sub = subjects.find(sub => sub.id === s.subject_id);
+    return `
+      <div class="activity-item">
+        <div class="activity-dot"></div>
+        <div class="activity-text">
+          Studied <strong>${sub?.subject_name || 'Unknown Subject'}</strong> for ${formatMinutes(s.duration_minutes)}
+        </div>
+        <div class="activity-time">${formatDate(s.date)}</div>
+      </div>`;
+  }).join('');
+}
+
+// ===== SUBJECTS VIEW =====
+async function renderSubjectsGrid() {
+  await loadSubjects();
+  const grid = document.getElementById('subjects-grid');
+  if (!subjects.length) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <span class="empty-state-icon">📚</span>
+        <div class="empty-state-title">No subjects yet</div>
+        <p class="empty-state-text">Create your first subject to get started.</p>
+        <button class="btn btn-primary btn-sm" data-open-modal="add-subject-modal">+ Add Subject</button>
+      </div>`;
+    return;
+  }
+
+  const cards = await Promise.all(subjects.map(async (sub) => {
+    const mods = await loadModulesForSubject(sub.id);
+    let all = 0, done = 0;
+    for (const m of mods) {
+      const topics = await loadTopicsForModule(m.id);
+      all += topics.length;
+      done += topics.filter(t => t.is_completed).length;
+    }
+    const pct = all ? Math.round(done / all * 100) : 0;
+    const studyTime = sessionsCache.filter(s => s.subject_id === sub.id).reduce((sum, s) => sum + s.duration_minutes, 0);
+    return { sub, mods, all, done, pct, studyTime };
+  }));
+
+  grid.innerHTML = cards.map(({ sub, mods, all, done, pct, studyTime }) => `
+    <div class="subject-card fade-in" style="--subject-color:${sub.color || SUBJECT_COLORS[0]};"
+         data-subject-id="${sub.id}">
+      <div class="subject-card-header">
+        <div class="subject-icon" style="background:${sub.color || SUBJECT_COLORS[0]}22;">${sub.icon || '📚'}</div>
+        <div class="subject-card-menu">
+          <button class="btn btn-icon btn-danger btn-sm" onclick="handleDeleteSubject('${sub.id}',event)" title="Delete">🗑</button>
+        </div>
+      </div>
+      <div class="subject-card-title">${sub.subject_name}</div>
+      <div class="subject-card-meta">${mods.length} modules · ${all} topics · ${formatMinutes(studyTime)}</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-label">
+          <span>${done} / ${all} topics complete</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill orange" style="width:${pct}%"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Open subject page on card click
+  grid.querySelectorAll('.subject-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.subject-card-menu')) return;
+      openSubjectPage(card.dataset.subjectId);
+    });
+  });
+}
+
+window.handleDeleteSubject = async function(id, e) {
+  e.stopPropagation();
+  if (!confirm('Delete this subject and all its data? This cannot be undone.')) return;
+  try {
+    await deleteSubject(id);
+    delete modulesCache[id];
+    toast('Subject deleted', 'success');
+    await loadSubjects();
+    renderSubjectsGrid();
+    loadDashboard();
+  } catch (err) {
+    toast('Failed to delete: ' + err.message, 'error');
+  }
+};
+
+// ===== SAVE SUBJECT =====
+document.getElementById('save-subject-btn').addEventListener('click', async () => {
+  const name = document.getElementById('new-subject-name').value.trim();
+  if (!name) { toast('Enter a subject name', 'error'); return; }
+  const btn = document.getElementById('save-subject-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await createSubject(user.id, name, selectedColor, selectedIcon);
+    closeAllModals();
+    document.getElementById('new-subject-name').value = '';
+    toast('Subject created!', 'success');
+    await loadSubjects();
+    renderSubjectsGrid();
+    loadDashboard();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Subject';
+  }
+});
+
+// ===== SUBJECT PAGE (inside dashboard) =====
+function openSubjectPage(subjectId) {
+  currentSubjectId = subjectId;
+  const sub = subjects.find(s => s.id === subjectId);
+  if (!sub) return;
+
+  // Build subject view inline in subjects view
+  const grid = document.getElementById('subjects-grid');
+  grid.innerHTML = `<div style="grid-column:1/-1;" id="subject-page-root"></div>`;
+  renderSubjectPage(subjectId, sub);
+}
+
+async function renderSubjectPage(subjectId, sub) {
+  const root = document.getElementById('subject-page-root');
+  if (!root) return;
+
+  const mods = await loadModulesForSubject(subjectId);
+  let all = 0, done = 0;
+  for (const m of mods) {
+    const topics = await loadTopicsForModule(m.id);
+    all += topics.length;
+    done += topics.filter(t => t.is_completed).length;
+  }
+  const pct = all ? Math.round(done / all * 100) : 0;
+  const studyTime = sessionsCache.filter(s => s.subject_id === subjectId).reduce((sum, s) => sum + s.duration_minutes, 0);
+
+  root.innerHTML = `
+    <div class="subject-page-header">
+      <button class="back-btn" id="back-to-subjects">← Back</button>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:${sub.color}22;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">${sub.icon || '📚'}</div>
+        <h2 style="font-size:1.6rem;">${sub.subject_name}</h2>
+      </div>
+    </div>
+
+    <div class="subject-page-stats">
+      <div class="card card-sm">
+        <div style="font-size:0.75rem;color:var(--ink4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Progress</div>
+        <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--ink);">${pct}%</div>
+        <div class="progress-bar" style="margin-top:6px;"><div class="progress-bar-fill orange" style="width:${pct}%"></div></div>
+      </div>
+      <div class="card card-sm">
+        <div style="font-size:0.75rem;color:var(--ink4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Topics</div>
+        <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--ink);">${done}<span style="font-size:1rem;color:var(--ink3);">/${all}</span></div>
+      </div>
+      <div class="card card-sm">
+        <div style="font-size:0.75rem;color:var(--ink4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Study Time</div>
+        <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--ink);">${formatMinutes(studyTime)}</div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3>Modules</h3>
+      <button class="btn btn-secondary btn-sm" id="add-module-btn-page">+ Add Module</button>
+    </div>
+
+    <div class="module-list" id="module-list"></div>
+  `;
+
+  document.getElementById('back-to-subjects').onclick = () => renderSubjectsGrid();
+  document.getElementById('add-module-btn-page').onclick = () => {
+    document.getElementById('new-module-name').value = '';
+    document.getElementById('new-module-title').value = '';
+    openModal('add-module-modal');
+  };
+
+  renderModuleList(subjectId);
+}
+
+async function renderModuleList(subjectId) {
+  const container = document.getElementById('module-list');
+  if (!container) return;
+  const mods = await loadModulesForSubject(subjectId);
+
+  if (!mods.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-state-icon">📂</span>
+        <div class="empty-state-title">No modules yet</div>
+        <p class="empty-state-text">Add modules to organise your topics by unit or chapter.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  for (const mod of mods) {
+    const topics = await loadTopicsForModule(mod.id);
+    const pct = calcProgress(topics);
+    const modEl = buildModuleElement(mod, topics, pct);
+    container.appendChild(modEl);
+  }
+}
+
+function buildModuleElement(mod, topics, pct) {
+  const el = document.createElement('div');
+  el.className = 'module-item';
+  el.dataset.moduleId = mod.id;
+
+  el.innerHTML = `
+    <div class="module-header">
+      <div class="module-toggle">▶</div>
+      <div class="module-info">
+        <div class="module-name">${mod.module_name}</div>
+        <div class="module-title">${mod.module_title || ''}</div>
+      </div>
+      <div class="module-progress-pill">${pct}%</div>
+      <div class="module-actions">
+        <button class="btn btn-icon btn-ghost btn-sm" data-action="delete-module" title="Delete Module">🗑</button>
+      </div>
+    </div>
+    <div class="module-body">
+      <div class="topics-list" id="topics-${mod.id}">
+        ${renderTopicsList(topics, mod.id)}
+      </div>
+      <button class="add-topic-btn" data-module-id="${mod.id}">+ Add Topic</button>
+    </div>
+  `;
+
+  // Toggle expand
+  el.querySelector('.module-header').addEventListener('click', (e) => {
+    if (e.target.closest('.module-actions')) return;
+    el.classList.toggle('expanded');
+  });
+
+  // Delete module
+  el.querySelector('[data-action="delete-module"]').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!confirm('Delete this module and all its topics?')) return;
+    try {
+      await deleteModule(mod.id);
+      delete topicsCache[mod.id];
+      modulesCache[currentSubjectId] = modulesCache[currentSubjectId]?.filter(m => m.id !== mod.id);
+      el.remove();
+      toast('Module deleted', 'success');
+    } catch (err) { toast(err.message, 'error'); }
+  });
+
+  // Add topic
+  el.querySelector('.add-topic-btn').addEventListener('click', () => {
+    currentModuleId = mod.id;
+    document.getElementById('new-topic-name').value = '';
+    document.getElementById('new-topic-notes').value = '';
+    document.getElementById('new-topic-priority').value = 'medium';
+    openModal('add-topic-modal');
+  });
+
+  // Topic interactions (delegation)
+  el.querySelector(`#topics-${mod.id}`).addEventListener('click', handleTopicClick);
+
+  return el;
+}
+
+function renderTopicsList(topics, moduleId) {
+  if (!topics.length) return `<p style="font-size:0.83rem;color:var(--ink4);padding:8px 0;">No topics yet.</p>`;
+  return topics.map(t => `
+    <div class="topic-item ${t.is_completed ? 'completed' : ''}" data-topic-id="${t.id}" data-module-id="${moduleId}">
+      <div class="topic-checkbox" data-action="toggle">${t.is_completed ? '✓' : ''}</div>
+      <div class="topic-name">${t.topic_name}</div>
+      <span class="priority-badge priority-${t.priority}">${t.priority}</span>
+      <div class="topic-actions">
+        <button class="btn btn-icon btn-ghost btn-sm" data-action="notes" title="Notes">📝</button>
+        <button class="btn btn-icon btn-ghost btn-sm" data-action="edit" title="Edit">✏</button>
+        <button class="btn btn-icon btn-danger btn-sm" data-action="delete" title="Delete">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function handleTopicClick(e) {
+  const topicEl = e.target.closest('[data-topic-id]');
+  if (!topicEl) return;
+  const topicId = topicEl.dataset.topicId;
+  const action = e.target.closest('[data-action]')?.dataset.action;
+  const moduleId = topicEl.dataset.moduleId;
+
+  if (!action) return;
+
+  if (action === 'toggle') {
+    const isNowComplete = !topicEl.classList.contains('completed');
+    try {
+      await toggleTopic(topicId, isNowComplete);
+      if (topicsCache[moduleId]) {
+        const t = topicsCache[moduleId].find(t => t.id === topicId);
+        if (t) t.is_completed = isNowComplete;
+      }
+      topicEl.classList.toggle('completed', isNowComplete);
+      topicEl.querySelector('.topic-checkbox').textContent = isNowComplete ? '✓' : '';
+      // Update module progress pill
+      const modEl = topicEl.closest('.module-item');
+      if (modEl) {
+        const topics = topicsCache[moduleId] || [];
+        const pct = calcProgress(topics);
+        const pill = modEl.querySelector('.module-progress-pill');
+        if (pill) pill.textContent = pct + '%';
+      }
+
+      // GAMIFICATION: Toggle XP for topic completion/undo
+      try {
+        const topic = topicsCache[moduleId]?.find(t => t.id === topicId) || { id: topicId, topic_name: topicEl.querySelector('.topic-title')?.textContent };
+        gamification.onTopicToggled(topic, isNowComplete);
+
+        // If module state changed (complete <-> incomplete), toggle module XP accordingly
+        const allTopics = topicsCache[moduleId] || [];
+        const mod = modulesCache[currentSubjectId]?.find(m => m.id === moduleId);
+        if (mod) {
+          const moduleNowComplete = allTopics.every(t => t.is_completed);
+          gamification.onModuleToggled(mod, moduleNowComplete);
+        }
+      } catch (err) {
+        console.warn('Gamification topic hook failed', err);
+      }
+
+      toast(isNowComplete ? 'Topic completed! 🎉' : 'Marked incomplete', 'info');
+    } catch (err) { toast(err.message, 'error'); }
+  }
+
+  if (action === 'edit') {
+    const topic = topicsCache[moduleId]?.find(t => t.id === topicId);
+    if (!topic) return;
+    document.getElementById('edit-topic-id').value = topicId;
+    document.getElementById('edit-topic-name').value = topic.topic_name;
+    document.getElementById('edit-topic-priority').value = topic.priority;
+    document.getElementById('edit-topic-notes').value = topic.notes || '';
+    openModal('edit-topic-modal');
+  }
+
+  if (action === 'delete') {
+    if (!confirm('Delete this topic?')) return;
+    try {
+      await deleteTopic(topicId);
+      if (topicsCache[moduleId]) {
+        topicsCache[moduleId] = topicsCache[moduleId].filter(t => t.id !== topicId);
+      }
+      topicEl.remove();
+      toast('Topic deleted', 'success');
+    } catch (err) { toast(err.message, 'error'); }
+  }
+
+  if (action === 'notes') {
+    const topic = topicsCache[moduleId]?.find(t => t.id === topicId);
+    document.getElementById('notes-topic-id').value = topicId;
+    document.getElementById('notes-modal-title').textContent = topic?.topic_name || 'Notes';
+    document.getElementById('notes-content').value = topic?.notes || '';
+    openModal('notes-modal');
+  }
+}
+
+// Save Topic
+document.getElementById('save-topic-btn').addEventListener('click', async () => {
+  const name = document.getElementById('new-topic-name').value.trim();
+  if (!name) { toast('Enter a topic name', 'error'); return; }
+  const priority = document.getElementById('new-topic-priority').value;
+  const notes = document.getElementById('new-topic-notes').value.trim();
+  try {
+    await createTopic(currentModuleId, name, priority, notes);
+    topicsCache[currentModuleId] = null; // invalidate
+    closeAllModals();
+    toast('Topic added!', 'success');
+    // Re-render module topics
+    const newTopics = await loadTopicsForModule(currentModuleId);
+    const container = document.getElementById(`topics-${currentModuleId}`);
+    if (container) container.innerHTML = renderTopicsList(newTopics, currentModuleId);
+    document.getElementById('new-topic-name').value = '';
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// Update Topic
+document.getElementById('update-topic-btn').addEventListener('click', async () => {
+  const id = document.getElementById('edit-topic-id').value;
+  const name = document.getElementById('edit-topic-name').value.trim();
+  const priority = document.getElementById('edit-topic-priority').value;
+  const notes = document.getElementById('edit-topic-notes').value.trim();
+  if (!name) { toast('Enter a topic name', 'error'); return; }
+  try {
+    await updateTopic(id, { topic_name: name, priority, notes });
+    // Update cache
+    for (const mId in topicsCache) {
+      if (topicsCache[mId]) {
+        const t = topicsCache[mId].find(t => t.id === id);
+        if (t) { t.topic_name = name; t.priority = priority; t.notes = notes; }
+      }
+    }
+    closeAllModals();
+    toast('Topic updated!', 'success');
+    // Re-render topics if visible
+    for (const mId in topicsCache) {
+      const container = document.getElementById(`topics-${mId}`);
+      if (container) container.innerHTML = renderTopicsList(topicsCache[mId], mId);
+    }
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// Save Notes
+document.getElementById('save-notes-btn').addEventListener('click', async () => {
+  const id = document.getElementById('notes-topic-id').value;
+  const notes = document.getElementById('notes-content').value.trim();
+  try {
+    await updateTopic(id, { notes });
+    for (const mId in topicsCache) {
+      if (topicsCache[mId]) {
+        const t = topicsCache[mId].find(t => t.id === id);
+        if (t) t.notes = notes;
+      }
+    }
+    closeAllModals();
+    toast('Notes saved!', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// Save Module
+document.getElementById('save-module-btn').addEventListener('click', async () => {
+  const name = document.getElementById('new-module-name').value.trim();
+  const title = document.getElementById('new-module-title').value.trim();
+  if (!name) { toast('Enter a module name', 'error'); return; }
+  try {
+    await createModule(currentSubjectId, name, title);
+    modulesCache[currentSubjectId] = null; // invalidate
+    closeAllModals();
+    toast('Module added!', 'success');
+    renderSubjectPage(currentSubjectId, subjects.find(s => s.id === currentSubjectId));
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// ===== ICON & COLOR PICKERS =====
+function populateIconPicker() {
+  const container = document.getElementById('icon-picker');
+  container.innerHTML = SUBJECT_ICONS.map(icon => `
+    <button class="btn btn-secondary btn-sm" style="font-size:1.2rem;padding:6px 10px;" data-icon="${icon}">${icon}</button>
+  `).join('');
+  container.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('button').forEach(b => b.style.background = '');
+      btn.style.background = 'var(--accent-soft)';
+      selectedIcon = btn.dataset.icon;
+    });
+  });
+}
+
+function populateColorPicker() {
+  const container = document.getElementById('color-picker');
+  container.innerHTML = SUBJECT_COLORS.map((c, i) => `
+    <div class="color-chip ${i === 0 ? 'selected' : ''}" style="background:${c};" data-color="${c}"></div>
+  `).join('');
+  container.querySelectorAll('.color-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      container.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedColor = chip.dataset.color;
+    });
+  });
+}
+
+// ===== TIMER VIEW =====
+async function loadTimerView() {
+  // Populate subject select
+  const subSel = document.getElementById('timer-subject-select');
+  subSel.innerHTML = '<option value="">— Select Subject —</option>' +
+    subjects.map(s => `<option value="${s.id}">${s.icon || '📚'} ${s.subject_name}</option>`).join('');
+
+  updateTimerUI();
+  updateTodaySessions();
+  updateGoalRing('timer');
+}
+
+function updateTimerUI() {
+  const elapsed = getCurrentElapsed();
+  document.getElementById('timer-display').textContent = formatTime(elapsed);
+  const focusDisplay = document.getElementById('focus-timer-display');
+  if (focusDisplay) focusDisplay.textContent = formatTime(elapsed);
+
+  const mainBtn = document.getElementById('timer-main-btn');
+  const focusBtn = document.getElementById('focus-main-btn');
+  if (timerState.running) {
+    if (mainBtn) { mainBtn.textContent = '⏸'; mainBtn.classList.add('running'); }
+    if (focusBtn) { focusBtn.textContent = '⏸'; focusBtn.classList.add('running'); }
+    document.getElementById('timer-display')?.classList.add('timer-running');
+  } else {
+    if (mainBtn) { mainBtn.textContent = '▶'; mainBtn.classList.remove('running'); }
+    if (focusBtn) { focusBtn.textContent = '▶'; focusBtn.classList.remove('running'); }
+    document.getElementById('timer-display')?.classList.remove('timer-running');
+  }
+
+  if (timerState.running && timerState.subjectName) {
+    const info = document.getElementById('timer-session-info');
+    if (info) info.textContent = `${timerState.subjectName}${timerState.moduleName ? ' · ' + timerState.moduleName : ''}`;
+    const focusLabel = document.getElementById('focus-task-label');
+    if (focusLabel) focusLabel.textContent = `${timerState.subjectName}${timerState.moduleName ? ' · ' + timerState.moduleName : ''}`.toUpperCase();
+  }
+}
+
+function onTimerTick(elapsed) {
+  document.getElementById('timer-display').textContent = formatTime(elapsed);
+  const focusDisplay = document.getElementById('focus-timer-display');
+  if (focusDisplay) focusDisplay.textContent = formatTime(elapsed);
+}
+
+async function onTimerSave(session) {
+    try {
+    await createStudySession(user.id, session.subjectId, session.moduleId, session.durationMinutes, session.date);
+    await loadSessions();
+
+    // GAMIFICATION: Award XP for session
+    try {
+      const sub = subjects.find(s => s.id === session.subjectId);
+      gamification.onSessionSaved({
+        durationMinutes: session.durationMinutes,
+        subjectName: sub?.subject_name || ''
+      });
+
+      // Check daily goal
+      const today = new Date().toISOString().split('T')[0];
+      const todayTotal = sessionsCache
+        .filter(s => s.date === today)
+        .reduce((sum, s) => sum + s.duration_minutes, 0);
+      if (todayTotal >= getDailyGoal()) {
+        gamification.onDailyGoalHit();
+      }
+
+      // Pass streak update
+      const streak = updateStreak(true);
+      gamification.onStreakUpdated(streak.count);
+    } catch (err) {
+      console.warn('Failed to award XP', err);
+    }
+
+    toast(`Session saved! ${formatMinutes(session.durationMinutes)} logged.`, 'success');
+    updateTodaySessions();
+    updateGoalRing('timer');
+    updateGoalRing('goals');
+    document.getElementById('stat-streak').textContent = getStreak().count;
+  } catch (e) {
+    toast('Failed to save session: ' + e.message, 'error');
+  }
+}
+
+// Timer subject select change
+document.getElementById('timer-subject-select').addEventListener('change', async function() {
+  const subId = this.value;
+  const modSel = document.getElementById('timer-module-select');
+  modSel.innerHTML = '<option value="">— Select Module —</option>';
+  if (!subId) return;
+  const mods = await loadModulesForSubject(subId);
+  mods.forEach(m => {
+    modSel.innerHTML += `<option value="${m.id}">${m.module_name}: ${m.module_title}</option>`;
+  });
+});
+
+// Timer start/stop
+document.getElementById('timer-main-btn').addEventListener('click', handleTimerToggle);
+document.getElementById('focus-main-btn').addEventListener('click', handleTimerToggle);
+
+async function handleTimerToggle() {
+  if (timerState.running) {
+    stopTimer();
+    updateTimerUI();
+  } else {
+    const subId = document.getElementById('timer-subject-select').value;
+    const modId = document.getElementById('timer-module-select').value;
+    if (!subId) { toast('Select a subject first', 'error'); return; }
+    const sub = subjects.find(s => s.id === subId);
+    const mods = modulesCache[subId] || [];
+    const mod = mods.find(m => m.id === modId);
+    startTimer(subId, modId || null, sub?.subject_name || '', mod?.module_name || '');
+    updateTimerUI();
+  }
+}
+
+// Timer reset
+document.getElementById('timer-reset-btn').addEventListener('click', () => {
+  if (timerState.running) { toast('Stop the timer before resetting', 'error'); return; }
+  resetTimer();
+  document.getElementById('timer-display').textContent = '00:00';
+});
+
+async function updateTodaySessions() {
+  const container = document.getElementById('today-sessions-list');
+  if (!container) return;
+  const today = new Date().toISOString().split('T')[0];
+  const todaySess = sessionsCache.filter(s => s.date === today);
+  const total = todaySess.reduce((sum, s) => sum + s.duration_minutes, 0);
+  document.getElementById('today-total-badge').textContent = formatMinutes(total) + ' total';
+
+  if (!todaySess.length) {
+    container.innerHTML = `<div class="empty-state" style="padding:24px 16px;"><span class="empty-state-icon" style="font-size:2rem;">🌱</span><p style="font-size:0.85rem;color:var(--ink3);">No sessions yet today.</p></div>`;
+    return;
+  }
+  container.innerHTML = todaySess.slice(0, 5).map(s => {
+    const sub = subjects.find(sub => sub.id === s.subject_id);
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg2);border-radius:var(--radius-sm);">
+        <div style="font-size:1rem;">${sub?.icon || '📚'}</div>
+        <div style="flex:1;font-size:0.85rem;color:var(--ink);">${sub?.subject_name || 'Unknown'}</div>
+        <div style="font-size:0.82rem;font-weight:600;color:var(--accent);">${formatMinutes(s.duration_minutes)}</div>
+      </div>`;
+  }).join('');
+}
+
+function updateGoalRing(context) {
+  const goal = getDailyGoal();
+  const today = new Date().toISOString().split('T')[0];
+  const todayMin = sessionsCache.filter(s => s.date === today).reduce((sum, s) => sum + s.duration_minutes, 0);
+  const pct = Math.min(Math.round(todayMin / goal * 100), 100);
+
+  if (context === 'timer') {
+    const circumference = 232.5;
+    const offset = circumference - (pct / 100) * circumference;
+    const ring = document.getElementById('timer-goal-ring');
+    if (ring) ring.style.strokeDashoffset = offset;
+    const pctEl = document.getElementById('timer-goal-pct');
+    if (pctEl) pctEl.textContent = pct + '%';
+    const valEl = document.getElementById('timer-goal-value');
+    if (valEl) valEl.textContent = formatMinutes(goal);
+  } else if (context === 'goals') {
+    const circumference = 289;
+    const offset = circumference - (pct / 100) * circumference;
+    const ring = document.getElementById('goals-ring');
+    if (ring) ring.style.strokeDashoffset = offset;
+    const pctEl = document.getElementById('goals-ring-pct');
+    if (pctEl) pctEl.textContent = pct + '%';
+    const todayEl = document.getElementById('goals-today-value');
+    if (todayEl) todayEl.textContent = formatMinutes(todayMin);
+    const goalEl = document.getElementById('goals-goal-value');
+    if (goalEl) goalEl.textContent = formatMinutes(goal);
+  }
+}
+
+// ===== FOCUS MODE =====
+const focusOverlay = document.getElementById('focus-overlay');
+
+document.getElementById('focus-mode-btn').addEventListener('click', openFocusMode);
+document.getElementById('focus-mode-timer-btn').addEventListener('click', openFocusMode);
+document.getElementById('focus-exit-btn').addEventListener('click', () => focusOverlay.classList.remove('active'));
+
+function openFocusMode() {
+  focusOverlay.classList.add('active');
+  const focusDisplay = document.getElementById('focus-timer-display');
+  if (focusDisplay) focusDisplay.textContent = formatTime(getCurrentElapsed());
+}
+
+// ===== ANALYTICS VIEW =====
+async function loadAnalytics() {
+  // Subject completion
+  const container = document.getElementById('analytics-subjects');
+  if (!subjects.length) {
+    container.innerHTML = '<p style="color:var(--ink4);font-size:0.88rem;">No subjects yet.</p>';
+  } else {
+    const items = await Promise.all(subjects.map(async sub => {
+      const mods = await loadModulesForSubject(sub.id);
+      let all = 0, done = 0;
+      for (const m of mods) {
+        const topics = await loadTopicsForModule(m.id);
+        all += topics.length; done += topics.filter(t => t.is_completed).length;
+      }
+      const pct = all ? Math.round(done / all * 100) : 0;
+      return { sub, all, done, pct };
+    }));
+    container.innerHTML = items.map(({ sub, all, done, pct }) => `
+      <div class="subject-progress-item">
+        <div class="subject-progress-icon" style="background:${sub.color || SUBJECT_COLORS[0]}22;">${sub.icon || '📚'}</div>
+        <div class="subject-progress-info">
+          <div class="subject-progress-name">${sub.subject_name} <span style="font-size:0.78rem;color:var(--ink4);">${done}/${all} topics</span></div>
+          <div class="progress-bar"><div class="progress-bar-fill orange" style="width:${pct}%"></div></div>
+        </div>
+        <div class="subject-progress-pct">${pct}%</div>
+      </div>`).join('');
+  }
+
+  // Week chart
+  const weekData = buildWeekChartData(sessionsCache);
+  const weekTotal = weekData.reduce((s, d) => s + d.minutes, 0);
+  document.getElementById('analytics-week-total').textContent = Math.round(weekTotal);
+  renderWeekChart('analytics-week-chart', weekData);
+
+  // All-time stats
+  const allSessions = await getAllSessions(user.id);
+  const totalMin = allSessions.reduce((s, ss) => s + ss.duration_minutes, 0);
+  document.getElementById('stat-alltime').textContent = formatMinutes(totalMin);
+  document.getElementById('stat-sessions').textContent = allSessions.length;
+  document.getElementById('stat-avg').textContent = allSessions.length ? formatMinutes(totalMin / allSessions.length) : '0m';
+
+  // Module breakdown
+  const modContainer = document.getElementById('analytics-modules');
+  if (!subjects.length) { modContainer.innerHTML = '<p style="color:var(--ink4);font-size:0.88rem;">No subjects yet.</p>'; return; }
+  const modItems = [];
+  for (const sub of subjects) {
+    const mods = await loadModulesForSubject(sub.id);
+    for (const mod of mods) {
+      const topics = await loadTopicsForModule(mod.id);
+      const pct = calcProgress(topics);
+      modItems.push({ sub, mod, topics, pct });
+    }
+  }
+  if (!modItems.length) { modContainer.innerHTML = '<p style="color:var(--ink4);font-size:0.88rem;">No modules yet.</p>'; return; }
+  modContainer.innerHTML = modItems.map(({ sub, mod, topics, pct }) => `
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+        <div style="font-size:0.87rem;color:var(--ink2);"><span style="color:var(--ink4);font-size:0.78rem;">${sub.subject_name} · </span>${mod.module_name}: ${mod.module_title || ''}</div>
+        <span style="font-size:0.82rem;font-weight:600;color:var(--ink3);">${pct}% · ${topics.filter(t=>t.is_completed).length}/${topics.length}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-bar-fill green" style="width:${pct}%"></div></div>
+    </div>`).join('');
+}
+
+// ===== PARSER VIEW =====
+function loadParserSubjects() {
+  const sel = document.getElementById('parser-subject-select');
+  sel.innerHTML = '<option value="">— Choose Subject —</option>' +
+    subjects.map(s => `<option value="${s.id}">${s.icon || '📚'} ${s.subject_name}</option>`).join('');
+}
+
+document.getElementById('parser-parse-btn').addEventListener('click', () => {
+  const text = document.getElementById('parser-input').value;
+  parsedData = parseSyllabus(text);
+  const stats = parsedStats(parsedData);
+  document.getElementById('parser-preview').innerHTML = renderParserPreview(parsedData);
+  document.getElementById('parser-stats').textContent = `${stats.modules} modules, ${stats.topics} topics`;
+  document.getElementById('parser-save-btn').disabled = !parsedData.length;
+});
+
+document.getElementById('parser-save-btn').addEventListener('click', async () => {
+  const subjectId = document.getElementById('parser-subject-select').value;
+  if (!subjectId) { toast('Select a subject first', 'error'); return; }
+  if (!parsedData.length) { toast('Nothing to save', 'error'); return; }
+
+  const btn = document.getElementById('parser-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    let modCount = 0, topicCount = 0;
+    for (const mod of parsedData) {
+      await createModule(subjectId, mod.name, mod.title);
+      modCount++;
+    }
+    // Re-fetch modules to get IDs
+    modulesCache[subjectId] = null;
+    const mods = await loadModulesForSubject(subjectId);
+    const newMods = mods.slice(-(parsedData.length)); // last N modules
+    for (let i = 0; i < parsedData.length; i++) {
+      const mod = parsedData[i];
+      const savedMod = newMods[i];
+      if (!savedMod) continue;
+      for (const topicName of mod.topics) {
+        await createTopic(savedMod.id, topicName, 'medium');
+        topicCount++;
+      }
+    }
+    toast(`Saved! ${modCount} modules & ${topicCount} topics added.`, 'success');
+    document.getElementById('parser-input').value = '';
+    document.getElementById('parser-preview').innerHTML = '<p style="color:var(--ink4);text-align:center;padding:40px 0;font-size:0.88rem;">Saved successfully!</p>';
+    parsedData = [];
+    btn.disabled = true;
+    // Invalidate caches
+    modulesCache[subjectId] = null;
+
+    // GAMIFICATION: Award XP for using parser
+    try {
+      gamification.onParserUsed();
+    } catch (err) {
+      console.warn('Gamification parser hook failed', err);
+    }
+  } catch (e) {
+    toast('Error saving: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save to Subject';
+  }
+});
+
+// ===== GOALS VIEW =====
+async function loadGoalsView() {
+  const streak = getStreak();
+  document.getElementById('streak-count').textContent = streak.count;
+
+  // Streak dots (last 7 days)
+  const dotsContainer = document.getElementById('streak-dots');
+  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const today = new Date();
+  dotsContainer.innerHTML = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(today); d.setDate(today.getDate() - (6 - i));
+    const dateStr = d.toISOString().split('T')[0];
+    const studied = sessionsCache.some(s => s.date === dateStr);
+    const isToday = i === 6;
+    return `<div class="streak-dot ${isToday ? 'today' : studied ? 'active' : ''}" title="${dateStr}">${days[d.getDay()]}</div>`;
+  }).join('');
+
+  updateGoalRing('goals');
+
+  // Calendar (last 4 weeks)
+  const calContainer = document.getElementById('goals-calendar');
+  const allSess = sessionsCache;
+  calContainer.innerHTML = Array.from({ length: 28 }).map((_, i) => {
+    const d = new Date(today); d.setDate(today.getDate() - (27 - i));
+    const dateStr = d.toISOString().split('T')[0];
+    const mins = allSess.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.duration_minutes, 0);
+    const intensity = mins === 0 ? 0 : mins < 30 ? 1 : mins < 60 ? 2 : mins < 120 ? 3 : 4;
+    const colors = ['var(--bg2)', '#F5DDD0', '#E8B89A', '#D4956A', 'var(--accent)'];
+    return `<div style="width:28px;height:28px;border-radius:5px;background:${colors[intensity]};cursor:default;transition:transform 0.1s;" title="${dateStr}: ${Math.round(mins)}min"></div>`;
+  }).join('');
+
+  // Gamification panel: populate state and wire buttons
+  try {
+    const gState = (typeof Gamification !== 'undefined' && Gamification && typeof Gamification.getState === 'function') ? Gamification.getState() : { xp: 0, level: 0, achievements: [] };
+    document.getElementById('gamify-xp').textContent = `${gState.xp || 0} XP`;
+    document.getElementById('gamify-level').textContent = `${gState.level || 0}`;
+    const achEl = document.getElementById('gamify-achievements');
+    if (gState.achievements && gState.achievements.length) achEl.textContent = gState.achievements.join(', ');
+    else achEl.textContent = 'None yet';
+
+    const syncBtn = document.getElementById('gamify-sync-btn');
+    const resetBtn = document.getElementById('gamify-reset-btn');
+
+    if (syncBtn) {
+      syncBtn.onclick = async () => {
+        if (typeof Gamification === 'undefined' || !Gamification) { toast('No gamification module', 'error'); return; }
+        try {
+          const res = await Gamification.syncToServer(supabase);
+          if (res && res.ok) toast('Gamification synced', 'success');
+          else toast('Sync failed: ' + (res?.reason || 'no server support'), 'error');
+        } catch (e) { toast('Sync error: ' + (e.message || e), 'error'); }
+      };
+    }
+
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (!confirm('Reset local gamification progress?')) return;
+        try { Gamification.reset(); toast('Gamification reset', 'success'); }
+        catch (e) { console.warn(e); toast('Reset failed', 'error'); }
+        // refresh view
+        const s = (typeof Gamification !== 'undefined' && Gamification && Gamification.getState) ? Gamification.getState() : { xp:0, level:0, achievements:[] };
+        document.getElementById('gamify-xp').textContent = `${s.xp||0} XP`;
+        document.getElementById('gamify-level').textContent = `${s.level||0}`;
+        document.getElementById('gamify-achievements').textContent = (s.achievements && s.achievements.length) ? s.achievements.join(', ') : 'None yet';
+      };
+    }
+  } catch (e) {
+    console.warn('Gamification panel init failed', e);
+  }
+}
+
+// ===== GAMIFICATION SYNC FROM EXISTING SESSIONS =====
+/**
+ * Sync gamification with existing study sessions from database
+ * Only syncs NEW sessions since last sync to avoid duplicate XP awards
+ */
+async function syncGamificationFromDB() {
+  try {
+    const SYNC_TRACK_KEY = 'studyos_gamification_synced_sessions';
+    
+    console.log('🔄 Starting gamification sync from database...');
+    
+    if (!sessionsCache || sessionsCache.length === 0) {
+      console.warn('No sessions found in cache. Loading sessions first...');
+      await loadSessions();
+    }
+
+    // Get list of sessions we've already synced
+    let syncedSessionIds = [];
+    try {
+      const stored = localStorage.getItem(SYNC_TRACK_KEY);
+      syncedSessionIds = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      console.warn('Could not load synced sessions list', e);
+    }
+
+    const XP_REWARDS = {
+      SESSION_PER_10MIN: 8,
+      SESSION_BONUS_30: 15,
+      SESSION_BONUS_60: 30,
+      FIRST_SESSION: 20,
+    };
+
+    let totalXPToAward = 0;
+    let newSessionsToSync = [];
+
+    // Find sessions that haven't been synced yet
+    for (const session of sessionsCache) {
+      if (!syncedSessionIds.includes(session.id)) {
+        newSessionsToSync.push(session);
+      }
+    }
+
+    if (newSessionsToSync.length === 0) {
+      console.log('✅ All sessions already synced. No new XP to award.');
+      return { success: true, xpAwarded: 0, sessionsProcessed: 0, reason: 'Already synced' };
+    }
+
+    // Calculate XP from only NEW sessions
+    for (let i = 0; i < newSessionsToSync.length; i++) {
+      const session = newSessionsToSync[i];
+      const durationMinutes = session.duration_minutes;
+      let xp = Math.floor(durationMinutes / 10) * XP_REWARDS.SESSION_PER_10MIN;
+      
+      if (durationMinutes >= 30) xp += XP_REWARDS.SESSION_BONUS_30;
+      if (durationMinutes >= 60) xp += XP_REWARDS.SESSION_BONUS_60;
+      
+      // First session ever bonus (only on very first session globally)
+      if (gamification.state.totalSessions === 0 && i === 0) xp += XP_REWARDS.FIRST_SESSION;
+      
+      totalXPToAward += xp;
+      
+      console.log(`  Session ${session.id}: ${durationMinutes}m → +${xp} XP`);
+    }
+
+    // Award the calculated XP to gamification
+    if (totalXPToAward > 0) {
+      // Directly update gamification state
+      gamification.state.totalXP += totalXPToAward;
+      gamification.state.totalSessions = Math.max(gamification.state.totalSessions, sessionsCache.length);
+      gamification.state.totalMinutes = sessionsCache.reduce((sum, s) => sum + s.duration_minutes, 0);
+      
+      // Mark badges as earned based on new totals
+      gamification._checkBadges();
+      
+      // Save to localStorage
+      gamification._save();
+      
+      // Track these sessions as synced
+      const newSyncedIds = syncedSessionIds.concat(newSessionsToSync.map(s => s.id));
+      localStorage.setItem(SYNC_TRACK_KEY, JSON.stringify(newSyncedIds));
+      
+      // Emit event for UI update
+      gamification._emit('xp_gained', { 
+        amount: totalXPToAward, 
+        label: `Synced ${newSessionsToSync.length} new session${newSessionsToSync.length !== 1 ? 's' : ''}`, 
+        total: gamification.state.totalXP 
+      });
+      
+      console.log(`✅ Sync complete! Awarded ${totalXPToAward} XP from ${newSessionsToSync.length} new sessions`);
+      console.log(`   Total XP now: ${gamification.state.totalXP}`);
+      console.log(`   Current level: ${gamification.getLevel().name} (Level ${gamification.getLevel().level})`);
+      
+      toast(`✅ Synced! +${totalXPToAward} XP from ${newSessionsToSync.length} new session${newSessionsToSync.length !== 1 ? 's' : ''}`, 'success');
+      
+      return { success: true, xpAwarded: totalXPToAward, sessionsProcessed: newSessionsToSync.length };
+    } else {
+      console.warn('⚠️ No new sessions to sync');
+      return { success: false, reason: 'No new sessions found' };
+    }
+  } catch (err) {
+    console.error('❌ Gamification sync failed:', err);
+    toast('Sync failed: ' + err.message, 'error');
+    return { success: false, error: err.message };
+  }
+}
+
+// Expose to window for easy access
+window.syncGamificationFromDB = syncGamificationFromDB;
+
+// Complete gamification reset to zero
+window.resetGamificationToZero = function() {
+  try {
+    console.log('🔄 Resetting gamification to zero...');
+    localStorage.removeItem('studyos_gamification_synced_sessions');
+    localStorage.removeItem('studyos_gamification');
+    gamification.reset();
+    console.log('✅ Gamification completely reset to zero!');
+    console.log('   Next page load will start syncing from your study sessions again.');
+    toast('✅ Gamification reset to zero! Reloading...', 'success');
+    
+    // Give user time to see the toast, then reload
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) {
+    console.error('❌ Reset failed', e);
+    toast('Reset failed: ' + e.message, 'error');
+  }
+};
+
+// Save Goal
+document.getElementById('save-goal-btn').addEventListener('click', () => {
+  const val = parseInt(document.getElementById('goal-input').value, 10);
+  if (!val || val < 5) { toast('Enter a valid goal (min 5 minutes)', 'error'); return; }
+  setDailyGoal(val);
+  closeAllModals();
+  toast('Goal updated!', 'success');
+  updateGoalRing('timer');
+  updateGoalRing('goals');
+});
+</script>
+</body>
+</html>

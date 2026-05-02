@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subject — Study OS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR (same as dashboard) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">📖</div>
+        <span class="sidebar-logo-text">Study OS</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebar-avatar">S</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebar-name">Student</div>
+          <div class="sidebar-user-email" id="sidebar-email"></div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a class="nav-item" href="dashboard.html#timer"><span class="nav-icon">⏱</span> Study Timer</a>
+      <a class="nav-item" href="dashboard.html#analytics"><span class="nav-icon">📊</span> Analytics</a>
+      <div class="nav-section-label">Subjects</div>
+      <a class="nav-item active" href="dashboard.html#subjects"><span class="nav-icon">📚</span> All Subjects</a>
+      <a class="nav-item" href="dashboard.html#parser"><span class="nav-icon">✦</span> Syllabus Parser</a>
+      <div class="nav-section-label">Tools</div>
+      <a class="nav-item" href="dashboard.html#goals"><span class="nav-icon">🏆</span> Goals &amp; Streaks</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="theme-toggle" id="theme-toggle">
+        <span class="theme-toggle-label"><span id="theme-icon">🌙</span> Dark Mode</span>
+        <div class="toggle-switch"></div>
+      </div>
+      <div class="nav-item" id="logout-btn" style="margin-top:4px;"><span class="nav-icon">→</span> Sign Out</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content" id="main-content">
+    <div id="subject-root">
+      <div class="page-loading"><span class="loading-spinner"></span> Loading subject...</div>
+    </div>
+  </main>
+</div>
+
+<!-- Add Module Modal -->
+<div class="modal-overlay" id="add-module-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Module</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Module Number</label>
+      <input type="text" id="new-module-name" placeholder="e.g. Module I" />
+    </div>
+    <div class="form-group">
+      <label>Module Title</label>
+      <input type="text" id="new-module-title" placeholder="e.g. Introduction to Networks" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-module-btn">Add Module</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Topic Modal -->
+<div class="modal-overlay" id="add-topic-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Topic</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Topic Name</label>
+      <input type="text" id="new-topic-name" placeholder="e.g. TCP/IP Model" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="new-topic-priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes (optional)</label>
+      <textarea id="new-topic-notes" placeholder="Any notes for this topic..." style="min-height:80px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-topic-btn">Add Topic</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Topic Modal -->
+<div class="modal-overlay" id="edit-topic-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Topic</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <input type="hidden" id="edit-topic-id" />
+    <div class="form-group">
+      <label>Topic Name</label>
+      <input type="text" id="edit-topic-name" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="edit-topic-priority">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="edit-topic-notes" style="min-height:100px;"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="update-topic-btn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Modal -->
+<div class="modal-overlay" id="notes-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="notes-modal-title">Topic Notes</h3>
+      <button class="modal-close">✕</button>
+    </div>
+    <input type="hidden" id="notes-topic-id" />
+    <div class="form-group">
+      <textarea class="notes-editor" id="notes-content" placeholder="Write your notes here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal>Cancel</button>
+      <button class="btn btn-primary" id="save-notes-btn">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initTheme, toggleTheme, toast, openModal, closeModal, closeAllModals,
+  formatMinutes, calcProgress, SUBJECT_COLORS } from './ui.js';
+import { initAuth, signOut, getUserName, getUserInitials } from './auth.js';
+import {
+  getSubjects, getModules, createModule, deleteModule,
+  getTopics, createTopic, updateTopic, deleteTopic, toggleTopic,
+  getStudySessions
+} from './db.js';
+
+let user = null;
+let subject = null;
+let subjectId = null;
+let modulesCache = {};
+let topicsCache = {};
+let sessionsCache = [];
+let currentModuleId = null;
+
+initTheme();
+
+// Theme toggle
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const theme = toggleTheme();
+  document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click', () => signOut());
+
+// Modal close delegation
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+  if (e.target.classList.contains('modal-close') || e.target.dataset.closeModal) closeAllModals();
+  const target = e.target.closest('[data-open-modal]');
+  if (target) openModal(target.dataset.openModal);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
+
+async function init() {
+  user = await initAuth();
+  if (!user) { window.location.href = 'index.html'; return; }
+
+  document.getElementById('sidebar-name').textContent = getUserName(user);
+  document.getElementById('sidebar-email').textContent = user.email;
+  document.getElementById('sidebar-avatar').textContent = getUserInitials(user);
+
+  // Get subject ID from URL
+  const params = new URLSearchParams(window.location.search);
+  subjectId = params.get('id');
+  if (!subjectId) { window.location.href = 'dashboard.html'; return; }
+
+  // Load subject info
+  const subjects = await getSubjects(user.id);
+  subject = subjects.find(s => s.id === subjectId);
+  if (!subject) { window.location.href = 'dashboard.html'; return; }
+
+  document.title = `${subject.subject_name} — Study OS`;
+
+  sessionsCache = await getStudySessions(user.id, 365);
+  await renderSubjectPage();
+}
+
+async function renderSubjectPage() {
+  const mods = await loadModules();
+  let all = 0, done = 0;
+  for (const m of mods) {
+    const topics = await loadTopics(m.id);
+    all += topics.length;
+    done += topics.filter(t => t.is_completed).length;
+  }
+  const pct = all ? Math.round(done / all * 100) : 0;
+  const studyTime = sessionsCache.filter(s => s.subject_id === subjectId).reduce((sum, s) => sum + s.duration_minutes, 0);
+
+  const root = document.getElementById('subject-root');
+  root.innerHTML = `
+    <div class="subject-page-header">
+      <a class="back-btn" href="dashboard.html">← All Subjects</a>
+      <div style="display:flex;align-items:center;gap:12px;flex:1;">
+        <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:${subject.color || SUBJECT_COLORS[0]}22;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">${subject.icon || '📚'}</div>
+        <h2 style="font-size:1.6rem;">${subject.subject_name}</h2>
+      </div>
+      <button class="btn btn-primary btn-sm" id="add-module-btn">+ Add Module</button>
+    </div>
+
+    <div class="subject-page-stats">
+      <div class="card card-sm">
+        <div style="font-size:0.75rem;color:var(--ink4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Progress</div>
+        <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--ink);">${pct}%</div>
+        <div class="progress-bar" style="margin-top:6px;"><div class="progress-bar-fill orange" style="width:${pct}%"></div></div>
+      </div>
+      <div class="card card-sm">
+        <div style="font-size:0.75rem;color:var(--ink4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Topics Done</div>
+        <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--ink);">${done}<span style="font-size:1rem;color:var(--ink3);">/${all}</span></div>
+      </div>
+      <div class="card card-sm">
+        <div style="font-size:0.75rem;color:var(--ink4);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Study Time</div>
+        <div style="font-family:var(--font-display);font-size:1.5rem;color:var(--ink);">${formatMinutes(studyTime)}</div>
+      </div>
+    </div>
+
+    <div class="module-list" id="module-list"></div>
+  `;
+
+  document.getElementById('add-module-btn').addEventListener('click', () => {
+    document.getElementById('new-module-name').value = '';
+    document.getElementById('new-module-title').value = '';
+    openModal('add-module-modal');
+  });
+
+  await renderModuleList();
+}
+
+async function loadModules() {
+  if (!modulesCache[subjectId]) {
+    modulesCache[subjectId] = await getModules(subjectId);
+  }
+  return modulesCache[subjectId];
+}
+
+async function loadTopics(moduleId) {
+  if (!topicsCache[moduleId]) {
+    topicsCache[moduleId] = await getTopics(moduleId);
+  }
+  return topicsCache[moduleId];
+}
+
+async function renderModuleList() {
+  const container = document.getElementById('module-list');
+  if (!container) return;
+  const mods = await loadModules();
+
+  if (!mods.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-state-icon">📂</span>
+        <div class="empty-state-title">No modules yet</div>
+        <p class="empty-state-text">Add modules to organise topics by unit or chapter.</p>
+        <button class="btn btn-primary btn-sm" id="add-module-empty-btn">+ Add Module</button>
+      </div>`;
+    container.querySelector('#add-module-empty-btn')?.addEventListener('click', () => openModal('add-module-modal'));
+    return;
+  }
+
+  container.innerHTML = '';
+  for (const mod of mods) {
+    const topics = await loadTopics(mod.id);
+    const pct = calcProgress(topics);
+    container.appendChild(buildModuleEl(mod, topics, pct));
+  }
+}
+
+function buildModuleEl(mod, topics, pct) {
+  const el = document.createElement('div');
+  el.className = 'module-item';
+  el.dataset.moduleId = mod.id;
+  el.innerHTML = `
+    <div class="module-header">
+      <div class="module-toggle">▶</div>
+      <div class="module-info">
+        <div class="module-name">${mod.module_name}</div>
+        <div class="module-title">${mod.module_title || ''}</div>
+      </div>
+      <div class="module-progress-pill">${pct}%</div>
+      <div class="module-actions">
+        <button class="btn btn-icon btn-ghost btn-sm" data-action="delete-module" title="Delete">🗑</button>
+      </div>
+    </div>
+    <div class="module-body">
+      <div class="topics-list" id="topics-${mod.id}">
+        ${renderTopics(topics, mod.id)}
+      </div>
+      <button class="add-topic-btn" data-module-id="${mod.id}">+ Add Topic</button>
+    </div>
+  `;
+
+  el.querySelector('.module-header').addEventListener('click', e => {
+    if (e.target.closest('.module-actions')) return;
+    el.classList.toggle('expanded');
+  });
+
+  el.querySelector('[data-action="delete-module"]').addEventListener('click', async e => {
+    e.stopPropagation();
+    if (!confirm('Delete this module and all its topics?')) return;
+    try {
+      await deleteModule(mod.id);
+      delete topicsCache[mod.id];
+      modulesCache[subjectId] = modulesCache[subjectId].filter(m => m.id !== mod.id);
+      el.remove();
+      toast('Module deleted', 'success');
+    } catch (err) { toast(err.message, 'error'); }
+  });
+
+  el.querySelector('.add-topic-btn').addEventListener('click', () => {
+    currentModuleId = mod.id;
+    document.getElementById('new-topic-name').value = '';
+    document.getElementById('new-topic-notes').value = '';
+    document.getElementById('new-topic-priority').value = 'medium';
+    openModal('add-topic-modal');
+  });
+
+  el.querySelector(`#topics-${mod.id}`).addEventListener('click', e => handleTopicAction(e, mod.id));
+  return el;
+}
+
+function renderTopics(topics, moduleId) {
+  if (!topics.length) return `<p style="font-size:0.83rem;color:var(--ink4);padding:8px 0;">No topics yet. Add one below.</p>`;
+  return topics.map(t => `
+    <div class="topic-item ${t.is_completed ? 'completed' : ''}" data-topic-id="${t.id}" data-module-id="${moduleId}">
+      <div class="topic-checkbox" data-action="toggle">${t.is_completed ? '✓' : ''}</div>
+      <div class="topic-name">${t.topic_name}</div>
+      <span class="priority-badge priority-${t.priority}">${t.priority}</span>
+      <div class="topic-actions">
+        <button class="btn btn-icon btn-ghost btn-sm" data-action="notes" title="Notes">📝</button>
+        <button class="btn btn-icon btn-ghost btn-sm" data-action="edit" title="Edit">✏</button>
+        <button class="btn btn-icon btn-danger btn-sm" data-action="delete" title="Delete">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function handleTopicAction(e, moduleId) {
+  const topicEl = e.target.closest('[data-topic-id]');
+  if (!topicEl) return;
+  const topicId = topicEl.dataset.topicId;
+  const action = e.target.closest('[data-action]')?.dataset.action;
+  if (!action) return;
+
+  if (action === 'toggle') {
+    const isNowComplete = !topicEl.classList.contains('completed');
+    await toggleTopic(topicId, isNowComplete);
+    if (topicsCache[moduleId]) {
+      const t = topicsCache[moduleId].find(t => t.id === topicId);
+      if (t) t.is_completed = isNowComplete;
+    }
+    topicEl.classList.toggle('completed', isNowComplete);
+    topicEl.querySelector('.topic-checkbox').textContent = isNowComplete ? '✓' : '';
+    const modEl = topicEl.closest('.module-item');
+    if (modEl) {
+      const topics = topicsCache[moduleId] || [];
+      const pill = modEl.querySelector('.module-progress-pill');
+      if (pill) pill.textContent = calcProgress(topics) + '%';
+    }
+    toast(isNowComplete ? '✓ Completed!' : 'Marked incomplete', 'info');
+  }
+
+  if (action === 'edit') {
+    const topic = topicsCache[moduleId]?.find(t => t.id === topicId);
+    if (!topic) return;
+    document.getElementById('edit-topic-id').value = topicId;
+    document.getElementById('edit-topic-name').value = topic.topic_name;
+    document.getElementById('edit-topic-priority').value = topic.priority;
+    document.getElementById('edit-topic-notes').value = topic.notes || '';
+    openModal('edit-topic-modal');
+  }
+
+  if (action === 'delete') {
+    if (!confirm('Delete this topic?')) return;
+    await deleteTopic(topicId);
+    topicsCache[moduleId] = topicsCache[moduleId]?.filter(t => t.id !== topicId);
+    topicEl.remove();
+    toast('Topic deleted', 'success');
+  }
+
+  if (action === 'notes') {
+    const topic = topicsCache[moduleId]?.find(t => t.id === topicId);
+    document.getElementById('notes-topic-id').value = topicId;
+    document.getElementById('notes-modal-title').textContent = topic?.topic_name || 'Notes';
+    document.getElementById('notes-content').value = topic?.notes || '';
+    openModal('notes-modal');
+  }
+}
+
+// Save module
+document.getElementById('save-module-btn').addEventListener('click', async () => {
+  const name = document.getElementById('new-module-name').value.trim();
+  const title = document.getElementById('new-module-title').value.trim();
+  if (!name) { toast('Enter a module name', 'error'); return; }
+  try {
+    await createModule(subjectId, name, title);
+    modulesCache[subjectId] = null;
+    closeAllModals();
+    toast('Module added!', 'success');
+    await renderSubjectPage();
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// Save topic
+document.getElementById('save-topic-btn').addEventListener('click', async () => {
+  const name = document.getElementById('new-topic-name').value.trim();
+  if (!name) { toast('Enter a topic name', 'error'); return; }
+  const priority = document.getElementById('new-topic-priority').value;
+  const notes = document.getElementById('new-topic-notes').value.trim();
+  try {
+    await createTopic(currentModuleId, name, priority, notes);
+    topicsCache[currentModuleId] = null;
+    closeAllModals();
+    const newTopics = await loadTopics(currentModuleId);
+    const container = document.getElementById(`topics-${currentModuleId}`);
+    if (container) container.innerHTML = renderTopics(newTopics, currentModuleId);
+    const modEl = document.querySelector(`[data-module-id="${currentModuleId}"] .module-progress-pill`) ||
+      document.querySelector(`.module-item[data-module-id="${currentModuleId}"] .module-progress-pill`);
+    if (modEl) modEl.textContent = calcProgress(newTopics) + '%';
+    toast('Topic added!', 'success');
+    document.getElementById('new-topic-name').value = '';
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// Update topic
+document.getElementById('update-topic-btn').addEventListener('click', async () => {
+  const id = document.getElementById('edit-topic-id').value;
+  const name = document.getElementById('edit-topic-name').value.trim();
+  const priority = document.getElementById('edit-topic-priority').value;
+  const notes = document.getElementById('edit-topic-notes').value.trim();
+  if (!name) { toast('Enter a topic name', 'error'); return; }
+  try {
+    await updateTopic(id, { topic_name: name, priority, notes });
+    for (const mId in topicsCache) {
+      if (topicsCache[mId]) {
+        const t = topicsCache[mId].find(t => t.id === id);
+        if (t) { t.topic_name = name; t.priority = priority; t.notes = notes; }
+      }
+    }
+    closeAllModals();
+    for (const mId in topicsCache) {
+      const container = document.getElementById(`topics-${mId}`);
+      if (container && topicsCache[mId]) container.innerHTML = renderTopics(topicsCache[mId], mId);
+    }
+    toast('Updated!', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+// Save notes
+document.getElementById('save-notes-btn').addEventListener('click', async () => {
+  const id = document.getElementById('notes-topic-id').value;
+  const notes = document.getElementById('notes-content').value.trim();
+  try {
+    await updateTopic(id, { notes });
+    for (const mId in topicsCache) {
+      if (topicsCache[mId]) {
+        const t = topicsCache[mId].find(t => t.id === id);
+        if (t) t.notes = notes;
+      }
+    }
+    closeAllModals();
+    toast('Notes saved!', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+});
+
+init();
+</script>
+</body>
+</html>
